@@ -5,6 +5,8 @@ from enum import Enum
 
 MMF = Enum("MMF", "START END")
 
+blankline = re.compile(r"(^\s+)|^$")
+
 
 def mmf_reader(filename: pathlib.Path) -> Union[str, Enum]:
     with open(filename, encoding="latin-1") as fo:
@@ -17,11 +19,16 @@ def mmf_reader(filename: pathlib.Path) -> Union[str, Enum]:
                 yield line
 
 
-def split_recipes(filename: pathlib.Path) -> Generator[List[str], None, None]:
+def split_recipes(
+    filename: pathlib.Path, remove_linebreaks=False
+) -> Generator[List[str], None, None]:
     recipe = []
     for line in mmf_reader(filename):
         if line == MMF.END:
-            yield recipe
+            if remove_linebreaks:
+                yield list(filter(lambda x: blankline.match(x) is None, recipe))
+            else:
+                yield recipe
         elif line == MMF.START:
             recipe = []
         else:
