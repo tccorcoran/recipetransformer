@@ -19,6 +19,29 @@ def mmf_reader(filename: pathlib.Path) -> Union[str, Enum]:
                 yield line
 
 
+def parse(recipe):
+    metadata = dict()
+    ingredient_end = False
+    ingredients = []
+    instructions = ""
+    for i, line in enumerate(recipe[1:]):
+        if ":" in line and i < 4:
+            metadata[line.split(":")[0].strip()] = line.split(":")[1].strip()
+        elif re.match(r"\d", line.strip()) and not ingredient_end:
+            ingredients.append(line.strip())
+        elif not blankline.match(line):
+            ingredients.append(line)
+        elif blankline.match(line) and i > 4:
+            ingredient_end = True
+            instructions = " ".join(recipe[i:])
+            break
+    return {
+        "metadata": metadata,
+        "instructions": instructions,
+        "ingredients": ingredients,
+    }
+
+
 def split_recipes(
     filename: pathlib.Path, remove_linebreaks=False
 ) -> Generator[List[str], None, None]:
