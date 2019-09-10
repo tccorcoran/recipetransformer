@@ -5,7 +5,7 @@ import click
 from recipe_transformer.corpus import mmf
 
 
-def really_simple_sentence_tokenizer(instuctions: str) -> List[str]:
+def really_simple_sentence_tokenizer(instructions: str) -> List[str]:
     pass
 
 

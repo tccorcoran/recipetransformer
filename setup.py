@@ -4,15 +4,6 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-def get_packages():
-    reqs = []
-    with open("requirements.txt") as fi:
-        for line in fi:
-            if not line.startswith("#"):
-                reqs.append(line.strip())
-    return reqs
-
-
 def get_version():
     with open("VERSION") as fi:
         return fi.read().strip()
@@ -27,7 +18,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/tccorcoran/recipetransformer",
-    packages=get_packages(),
+    packages=setuptools.find_packages(
+        exclude=["*.tests", "*.tests.*", "tests.*", "tests"]
+    ),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
