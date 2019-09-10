@@ -42,17 +42,37 @@ def parse(recipe):
     }
 
 
+mpa = dict.fromkeys(range(32))
+
+
+def remove_ascii_control_chars(input_str: str) -> str:
+    return input_str.translate(mpa)
+
+
 def split_recipes(
-    filename: pathlib.Path, remove_linebreaks=False
-) -> Generator[List[str], None, None]:
+    filename: pathlib.Path, remove_blanklines=False, keep_variations=False
+) -> Generator[List[str], dict, None]:
+    stats = {"recipes": 0, "lines": 0}
     recipe = []
     for line in mmf_reader(filename):
         if line == MMF.END:
-            if remove_linebreaks:
-                yield list(filter(lambda x: blankline.match(x) is None, recipe))
-            else:
+            if not keep_variations:
+                if len([x for x in recipe if x.startswith("MMMMM")]) > 2:
+                    recipe = []
+                    continue
+            if remove_blanklines:
+                stats["recipes"] += 1
+                recipe = list(filter(lambda x: blankline.match(x) is None, recipe))
+                stats["lines"] += len(recipe)
                 yield recipe
-        elif line == MMF.START:
+            else:
+                stats["recipes"] += 1
+                stats["lines"] += len(recipe)
+                yield recipe
             recipe = []
+
+        elif line == MMF.START:
+            continue  # TODO: do something here
         else:
-            recipe.append(line.strip())
+            recipe.append(remove_ascii_control_chars(line.strip()))
+    return stats
